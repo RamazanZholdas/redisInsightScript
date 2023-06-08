@@ -1,5 +1,6 @@
 #!/bin/bash
 output=$(aws secretsmanager get-secret-value --region us-east-1 --secret-id redisProdEndpoints --query SecretString --output text | jq -r .endpoints)
+password=$(aws secretsmanager get-secret-value --region us-east-1 --secret-id redisToken --query SecretString --output text | jq -r .redisAuthToken)
 IFS=',' read -ra endpoints <<< "$output"
 
 for endpoint in "${endpoints[@]}"; do
@@ -7,6 +8,7 @@ for endpoint in "${endpoints[@]}"; do
 {
     "name": "$endpoint",
     "connectionType": "STANDALONE",
+    "password": "$password",
     "host": "$endpoint",
     "port": 6379
 }
