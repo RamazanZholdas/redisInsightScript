@@ -1,8 +1,12 @@
 #!/bin/bash
-output=$(aws secretsmanager get-secret-value --region us-east-1 --secret-id redisProdEndpoints --query SecretString --output text | jq -r .endpoints)
-names=$(aws secretsmanager get-secret-value --region us-east-1 --secret-id redisProdEndpoints --query SecretString --output text | jq -r .names)
-passwords=$(aws secretsmanager get-secret-value --region us-east-1 --secret-id redisProdEndpoints --query SecretString --output text | jq -r .token)
-redisInsightPassword=$(aws secretsmanager get-secret-value --region us-east-1 --secret-id ramazansRedisInsightPassword --query SecretString --output text | jq -r .redisInsightPassword)
+redisProdEndpoints=$1
+ramazansRedisInsightPassword=$2
+redisTrainingURL=$3
+
+output=$(aws secretsmanager get-secret-value --region us-east-1 --secret-id "$redisProdEndpoints" --query SecretString --output text | jq -r .endpoints)
+names=$(aws secretsmanager get-secret-value --region us-east-1 --secret-id "$redisProdEndpoints" --query SecretString --output text | jq -r .names)
+passwords=$(aws secretsmanager get-secret-value --region us-east-1 --secret-id "$redisProdEndpoints" --query SecretString --output text | jq -r .token)
+redisInsightPassword=$(aws secretsmanager get-secret-value --region us-east-1 --secret-id "$ramazansRedisInsightPassword" --query SecretString --output text | jq -r .redisInsightPassword)
 
 IFS=',' read -ra endpoints <<< "$output"
 IFS=',' read -ra namesArr <<< "$names"
@@ -47,7 +51,7 @@ EOF
 )
 
     response=$(curl -X POST \
-        https://redis.training.edetekapps.com/prod/api/instance/ \
+        "$redisTrainingURL/api/instance/" \
         -H 'Content-Type: application/json' \
         -H "password: $redisInsightPassword" \
         -d "$payload")
